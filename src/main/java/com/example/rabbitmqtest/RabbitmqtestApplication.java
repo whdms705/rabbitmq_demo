@@ -2,10 +2,8 @@ package com.example.rabbitmqtest;
 
 import com.example.rabbitmqtest.entity.EmployeeRequest;
 import com.example.rabbitmqtest.entity.PictureRequest;
-import com.example.rabbitmqtest.producer.EmployeeJsonProducer;
-import com.example.rabbitmqtest.producer.HelloRabbitProducer;
-import com.example.rabbitmqtest.producer.HumanResourceProducer;
-import com.example.rabbitmqtest.producer.PictureProducer;
+import com.example.rabbitmqtest.producer.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -33,15 +31,18 @@ public class RabbitmqtestApplication implements CommandLineRunner {
     @Autowired
     private PictureProducer pictureProducer; // direct ex
 
+    @Autowired
+    private PictureProducer2 pictureProducer2; // topic
+
     private final List<String> SOURCES = new ArrayList<>(Arrays.asList("mobile", "web"));
-    private final List<String> TYPES = new ArrayList<>(Arrays.asList("jpg", "png", "avg"));
+    private final List<String> TYPES = new ArrayList<>(Arrays.asList("jpg", "png", "svg"));
 
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqtestApplication.class, args);
     }
 
     @Override
-    public void run(String... args){
+    public void run(String... args) throws JsonProcessingException {
         for(int i=0;i<5;i++){
             EmployeeRequest employee = new EmployeeRequest("emp "+i,"Employee "+i, LocalDate.now());
             employeeJsonProducer.sendMessage(employee);
@@ -56,7 +57,7 @@ public class RabbitmqtestApplication implements CommandLineRunner {
             p.setSize(ThreadLocalRandom.current().nextLong(1,100001));
             p.setSource(SOURCES.get(i % SOURCES.size()));
             p.setType(TYPES.get(i % TYPES.size()));
-            pictureProducer.sendMessage(p);
+            pictureProducer2.sendMessage(p);
         }
     }
 }
