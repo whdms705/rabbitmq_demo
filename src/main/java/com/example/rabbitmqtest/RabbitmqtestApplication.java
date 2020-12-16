@@ -34,6 +34,9 @@ public class RabbitmqtestApplication implements CommandLineRunner {
     @Autowired
     private PictureProducer2 pictureProducer2; // topic
 
+    @Autowired
+    private RetryPictureProducer retryPictureProducer; // retry
+
     private final List<String> SOURCES = new ArrayList<>(Arrays.asList("mobile", "web"));
     private final List<String> TYPES = new ArrayList<>(Arrays.asList("jpg", "png", "svg"));
 
@@ -43,21 +46,14 @@ public class RabbitmqtestApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws JsonProcessingException {
-        for(int i=0;i<5;i++){
-            EmployeeRequest employee = new EmployeeRequest("emp "+i,"Employee "+i, LocalDate.now());
-            employeeJsonProducer.sendMessage(employee);
-            humanResourceProducer.sendMessage(employee);
-        }
-        helloRabbitProducer.sendHello("title");
-
         for(int i=0;i<10;i++){
             PictureRequest p = new PictureRequest();
 
             p.setName("Picture "+i);
-            p.setSize(ThreadLocalRandom.current().nextLong(1,100001));
+            p.setSize(ThreadLocalRandom.current().nextLong(9001,100001));
             p.setSource(SOURCES.get(i % SOURCES.size()));
             p.setType(TYPES.get(i % TYPES.size()));
-            pictureProducer2.sendMessage(p);
+            retryPictureProducer.sendMessage(p);
         }
     }
 }
